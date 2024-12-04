@@ -63,7 +63,7 @@ def face_detection():
     Returns: True if face detected, False otherwise.
     """
     global camera
-    face_cascade = cv2.CascadeClassifier('/home/laura/Documents/Code/Lab2/lab/haarcascade_frontalface_default.xml')
+    face_cascade = cv2.CascadeClassifier('/home/pi/Documents/finalproject/iot_final_project/haarcascade_frontalface_default (1).xml')
 
     # TODO: Implement function to analyze faces from the camera feed
 
@@ -77,3 +77,17 @@ def face_detection():
         face_detected = True
 
     return face_detected
+
+'''
+initialize_camera()
+while True:
+    face_detected= face_detection()
+    if face_detected:
+        print('yes')
+    else:
+        print('no')
+    if cv2.waitKey(1) & 0xFF==ord('q'):
+        camera.stop()
+        cv2.destroyAllWindows()
+        break
+'''
