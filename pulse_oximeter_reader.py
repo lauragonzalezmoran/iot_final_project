@@ -1,6 +1,6 @@
 import max30102
 import hrcalc
-import numpy
+
 
 m = max30102.MAX30102()
 
