@@ -24,8 +24,9 @@ def stop_alarma():
         print(f"Error al detener la alarma: {e}")
 
 # Ejemplo de uso
+'''
 if __name__ == "__main__":
-    archivo_mp3 = "alarm.mp3"  # Cambia esto por la ruta de tu archivo MP3
+    archivo_mp3 = "alarm.wav"  # Cambia esto por la ruta de tu archivo MP3
     alarma(archivo_mp3)
     time.sleep(10)  # Deja que la alarma suene por 10 segundos
-    stop_alarma()
+    stop_alarma()'''
