@@ -78,8 +78,7 @@ def face_detection():
 
     return face_detected
 
-'''
-initialize_camera()
+'''initialize_camera()
 while True:
     face_detected= face_detection()
     if face_detected:
@@ -89,5 +88,6 @@ while True:
     if cv2.waitKey(1) & 0xFF==ord('q'):
         camera.stop()
         cv2.destroyAllWindows()
-        break
+        break'''
+    
 '''
