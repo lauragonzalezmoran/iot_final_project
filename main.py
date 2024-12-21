@@ -32,7 +32,7 @@ def trigger_alert(message):
 # ===========================
 def log_data(heart_rate, oxygen_level, face_detected):
     """
-    Logs real-time data of the baby's vital signs into a file, enabling the asphyxia detection algorithm to be refined
+    Logs real-time data of the baby's vital signs into a file, enabling the asphyxia detection algorithm to be later refined
     based on personalized normal vital sign ranges. 
 
     Parameters:
