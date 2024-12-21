@@ -34,7 +34,7 @@ def stop_alarma():
     Stop the currently playing alarm sound.
 
     This function stops the playback of the alarm sound
-    that was started using the `alarma` function.
+    that was started using the alarma function.
 
     Raises:
     Exception: If there is an error stopping the MP3 playback.
