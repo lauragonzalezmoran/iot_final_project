@@ -1,25 +1,45 @@
-# max30102-tutorial-raspberrypi
+# Baby Monitoring System
 
-This repository is unofficial porting of Arduino sample code of MAXRESDEF117#(max30102) HR/SpO2 sensor.
+This project is a baby monitoring system that uses a pulse oximeter and a night vision camera to detect vital signs and potential risks of suffocation. The system logs data in real-time and triggers an alarm if dangerous conditions are detected.
 
-MAXREFDES117#: https://www.maximintegrated.com/jp/design/reference-design-center/system-board/6300.html  
-Original Arduino codes: https://github.com/MaximIntegratedRefDesTeam/RD117_ARDUINO/
+## Repository Structure
 
-Related Qiita post (Japanese): https://qiita.com/vrn/items/1ac58c61194b23af1d8c
+- `main.py`: Main file that starts the monitoring system and coordinates the different functions.
+- `alarm.py`: Module that handles the activation and deactivation of the sound alarm.
+- `haarcascade_frontalface_default (1).xml`: XML file containing the Haar classifier for face detection.
+- `hrcalc.py`: Module that provides functions to calculate heart rate (HR) and blood oxygen saturation (SpO2) from sensor data.
+- `max30102.py`: Module that provides an interface for the MAX30102 pulse oximeter sensor.
+- `night_vision_camera.py`: Module that initializes the night vision camera and monitors motion and face detection.
+- `pulse_oximeter_reader.py`: Module that initializes the pulse oximeter and obtains real-time data.
+- `sleep_monitor_log.csv`: Output file where monitoring data is logged.
+- `.gitignore`: File specifying which files should be ignored by Git.
 
-## Files
+## Running the Code
 
-- `max30102.py` contains a class which has some setup functions and sensor-reading functions
-- `hrdump.py` uses `max30102.py` and records the values read by the sensor (sample logs are`ir.log` and `red.log`)
-- `hrcalc.py` provides a function which calcs HR and SpO2 (but experimental)
-- `makegraph.py` can visualize the log data (but it does not work on raspberry pi cli)
+To run the monitoring system, follow these steps:
 
-## Run
+1. Ensure you have the necessary dependencies installed, such as `pygame` and `RPi.GPIO`.
+2. Run the `main.py` file:
+   ```sh
+   python main.py
 
-Before running, enable i2c interface, install smbus and rpi.gpio, and connect the sensor.  
-If you use `hrcalc.py` to get HR and SpO2, numpy is required.
+## Input File Formats
+- haarcascade_frontalface_default (1).xml: XML file used for face detection.
 
-Note that the following pin connection is assumed in the files:
+## Output Files
+- sleep_monitor_log.csv: CSV file where real-time monitoring data is logged, including heart rate, oxygen saturation, and face detection.
+Hardcoded Addresses
+
+In main.py, the path to the alarm sound file is hardcoded as alarm.wav. Replace this path with the location of your alarm sound file.
+
+## Hardware
+
+The system is designed to run on a Raspberry Pi environment with a MAX30102 sensor and a night vision camera. Connect the camera to the rashberry pi and also connect the pin to the pulse-oximeter pcb as indicated below.
+
+Before running, enable i2c interface, install smbus and rpi.gpio, and connect the sensor.
+> ⚠️ **Warning**: Ensure that sense hat is not connected for the I2C to work.
+
+#### Port Connections:
 
 | RPi                     | HR Sensor |
 | ----------------------- | --------- |
@@ -29,120 +49,7 @@ Note that the following pin connection is assumed in the files:
 | - (pin7; GPIO 4)        | INT       |
 | GND (pin9)              | GND       |
 
-The code requires all 5 pins to work correctly. Please ensure that `INT` pin is connected.
+The code requires all 5 pins to work correctly. Please ensure that INT pin is connected.
 
-### Record Raw Values
+If you have any questions or need more information, feel free to contact us.
 
-You can initialize the sensor by running the followings.
-
-```python
->>> import max30102
->>> m = max30102.MAX30102() # sensor initialization
->>> red, ir = m.read_sequential() # get LEDs readings
-```
-
-`read_sequential()` will block until getting 100 values (default; can be changed) for each LED.
-It uses `INT` pin for checking the value availability.
-If the pin is not connected, this will blocks forever (i.e. the script will freeze).
-
-After that, `red` and `ir` should have 100 values each.
-
-If you use different pin other than pin 7 for INT, `max30102.MAX30102()` should be modified (`gpio_pin=7` is the default value).  
-If your HR sensor's address is not `0x57`, `max30102.MAX30102()` should be modified (`address=0x57` is the default value).
-
-### Calculate HR / SpO2
-
-`hrcalc.py` has a function `calc_hr_and_spo2(ir_data, red_data) -> (hr, hr_valid, spo2, spo2_valid)`
-which works as an approximation of `maxim_heart_rate_and_oxygen_saturation` in the original Arduino implementation.
-
-**The resulting HR & SpO2 may be different between original implementation and this implementation.**  
-
-```python
-# after you load red and ir
->>> import hrcalc
->>> hrcalc.calc_hr_and_spo2(ir[:100], red[:100]) # give 100 values
-(136, True, 98.752554, True)
-# this shows hr is 136 and it is a valid value, spo2 is 98% and it is a valid value
-# this value is produced when using line 10 - 110 of sample logs
-```
-
-### Using sample files (ir.log, red.log)
-
-These two files are pre-recorded sensor data. Both has 1000 lines (= 1000 values).
-
-Tesing can be:
-
-```python
->>> import hrcalc
->>> ir = []
->>> with open("ir.log", "r") as f:
-...     for line in f:
-...         ir.append(int(line))
-...
->>> red = []
->>> with open("red.log", "r") as f:
-...     for line in f:
-...         red.append(int(line))
-...
->>> for i in range(37):
-...     print(hrcalc.calc_hr_and_spo2(ir[25*i:25*i+100], red[25*i:25*i+100]))
-...
-(-999, False, -999, False)
-(107, True, 99.43662599999999, True)
-(88, True, 99.519096, True)
-(83, True, 99.855786, True)
-(83, True, 99.59255399999999, True)
-(125, True, 99.758856, True)
-(100, True, 99.43662599999999, True)
-(107, True, 99.657, True)
-(115, True, 99.848136, True)
-(136, True, 99.824664, True)
-(125, True, 99.0534, True)
-(100, True, 99.8058, True)
-(115, True, 99.135144, True)
-(93, True, 99.016626, True)
-(100, True, 99.771114, True)
-(88, True, 99.169194, True)
-(100, True, 99.169194, True)
-(107, True, 99.373746, True)
-(100, True, 99.84405, True)
-(125, True, 99.758856, True)
-(115, True, 99.758856, True)
-(88, True, 99.43662599999999, True)
-(68, True, 99.345144, True)
-(65, True, 99.373746, True)
-(65, True, 99.373746, True)
-(78, True, 99.854424, True)
-(88, True, 99.712434, True)
-(83, True, 99.657, True)
-(93, True, 99.345144, True)
-(88, True, 99.712434, True)
-(88, True, 99.855786, True)
-(68, True, 99.848136, True)
-(68, True, 99.848136, True)
-(42, True, 99.854424, True)
-(71, True, 96.23505, True)
-(75, True, 98.928594, True)
-(83, True, 99.43662599999999, True)
-```
-
-### Running Continuously
-
-You may wrap `read_sequential()` with `while` infinite loop to get sensor values continuously.
-
-```python:continuous_monitor.py
-
-import max30102
-import hrcalc
-
-m = max30102.MAX30102()
-
-# 100 samples are read and used for HR/SpO2 calculation in a single loop
-while True:
-    red, ir = m.read_sequential()
-    print(hrcalc.calc_hr_and_spo2(ir, red))
-```
-
------
-
-Caution: Do not use these files at critical/fatal situations. No guarantee of calculation result.
